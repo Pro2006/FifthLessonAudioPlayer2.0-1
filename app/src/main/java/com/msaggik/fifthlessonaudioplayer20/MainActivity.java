@@ -26,12 +26,13 @@ public class MainActivity extends AppCompatActivity implements Runnable {
     private MediaPlayer mediaPlayer = new MediaPlayer(); // создание поля медиа-плеера
     private SeekBar seekBar; // создание поля SeekBar
     private boolean wasPlaying = false; // поле проигрывания аудио-файла
-    private FloatingActionButton fabPlayPause, fabNext, fabBack, fabLoop, fabForward; // поле кнопки проигрывания и постановки на паузу аудиофайла
+    private FloatingActionButton fabPlayPause;
+    private FloatingActionButton fabBack;
+    private FloatingActionButton fabLoop;
+    private FloatingActionButton fabForward; // поле кнопки проигрывания и постановки на паузу аудиофайла
     private TextView seekBarHint, songInformation; // поле информации у SeekBar
-    private String metaDataAudio;
     private boolean isRepeat = false;
     int mediaPlayerStopProgress = 0;
-    private String[] f;
     private int musicList = 0;
 
 
@@ -42,7 +43,7 @@ public class MainActivity extends AppCompatActivity implements Runnable {
 
         // присваивание полям id ресурсов
         fabPlayPause = findViewById(R.id.fabPlayPause);
-        fabNext = findViewById(R.id.floatingActionNext);
+        FloatingActionButton fabNext = findViewById(R.id.floatingActionNext);
         fabForward = findViewById(R.id.floatingActionForward);
         fabBack = findViewById(R.id.floatingButtonback);
         fabLoop = findViewById(R.id.floatingActionLoop);
@@ -121,13 +122,14 @@ public class MainActivity extends AppCompatActivity implements Runnable {
                 case R.id.floatingActionNext:
                     if (mediaPlayer != null) {
                         clearMediaPlayer();
-                        fabPlayPause.setImageDrawable(ContextCompat.getDrawable(MainActivity.this, android.R.drawable.ic_media_play));
-                        seekBar.setProgress(0);
-                        mediaPlayerStopProgress = 0;
-                        musicList += 1;
-                        playSong();
-                        break;
                     }
+                    fabPlayPause.setImageDrawable(ContextCompat.getDrawable(MainActivity.this, android.R.drawable.ic_media_play));
+                    seekBar.setProgress(0);
+                    mediaPlayerStopProgress = 0;
+                    musicList += 1;
+                    playSong();
+                    break;
+
                 case R.id.floatingButtonback:
                     if (mediaPlayer != null) {
                         mediaPlayer.seekTo(mediaPlayer.getCurrentPosition() - 5000);
@@ -179,23 +181,24 @@ public class MainActivity extends AppCompatActivity implements Runnable {
                         fileList[i] = listOfFiles[i].getName();
                     }
                 }*/
-                f = getAssets().list("");
+                // ниже идут циклы, которые создают список песен, учитывая их количество в assets
+                String[] f = getAssets().list("");
                 int countOfMp3 = 0;
-                for (int i = 0; i < f.length; i ++) {
-                    if (f[i].contains(".mp3")) {
+                for (String s : f) {
+                    if (s.contains(".mp3")) {
                         countOfMp3 += 1;
                     }
                 }
                 String[] filesList = new String[countOfMp3];
                 countOfMp3 = 0;
-                for (int i = 0; i < f.length; i ++) {
-                    if (f[i].contains(".mp3")) {
-                        filesList[countOfMp3] = f[i];
+                for (String s : f) {
+                    if (s.contains(".mp3")) {
+                        filesList[countOfMp3] = s;
                         countOfMp3 += 1;
                     }
                 }
                 countOfMp3 = 0;
-                System.out.println(filesList);
+                System.out.println(Arrays.toString(filesList));
                 AssetFileDescriptor descriptor = getAssets().openFd(filesList[musicList % filesList.length]/* "cure_for_me.mp3"*/);
                 // запись файла в mediaPlayer, задаются параметры (путь файла, смещение относительно начала файла, длина аудио в файле)
                 mediaPlayer.setDataSource(descriptor.getFileDescriptor(), descriptor.getStartOffset(), descriptor.getLength());
@@ -203,7 +206,7 @@ public class MainActivity extends AppCompatActivity implements Runnable {
                 // получение мета-данных из аудио файла
                 MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
                 mediaMetadataRetriever.setDataSource(descriptor.getFileDescriptor(), descriptor.getStartOffset(), descriptor.getLength());
-                metaDataAudio = mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE) +
+                String metaDataAudio = mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE) +
                         " \n- ";
                 String author = mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
                 if (author == null) {
