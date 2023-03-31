@@ -8,11 +8,17 @@ import android.content.res.AssetFileDescriptor;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity implements Runnable {
 
@@ -25,6 +31,8 @@ public class MainActivity extends AppCompatActivity implements Runnable {
     private String metaDataAudio;
     private boolean isRepeat = false;
     int mediaPlayerStopProgress = 0;
+    private String[] f;
+    private int musicList = 0;
 
 
     @Override
@@ -99,6 +107,7 @@ public class MainActivity extends AppCompatActivity implements Runnable {
         fabBack.setOnClickListener(listener);
         fabLoop.setOnClickListener(listener);
         fabForward.setOnClickListener(listener);
+        fabNext.setOnClickListener(listener);
     }
 
     private final View.OnClickListener listener = new View.OnClickListener() {
@@ -109,6 +118,13 @@ public class MainActivity extends AppCompatActivity implements Runnable {
                 case R.id.fabPlayPause:
                     playSong();
                     break;
+                case R.id.floatingActionNext:
+                    if (mediaPlayer != null) {
+                        clearMediaPlayer();
+                        musicList += 1;
+                        playSong();
+                        break;
+                    }
                 case R.id.floatingButtonback:
                     if (mediaPlayer != null) {
                         mediaPlayer.seekTo(mediaPlayer.getCurrentPosition() - 5000);
@@ -151,7 +167,27 @@ public class MainActivity extends AppCompatActivity implements Runnable {
                     mediaPlayer = new MediaPlayer(); // то выделяется для него память
                 }
                 // альтернативный способ считывания файла с помощью файлового дескриптора
-                AssetFileDescriptor descriptor = getAssets().openFd("Н.А.Римский-Корсаков - Полёт шмеля.mp3");
+                /*File folder = new File("M:\\AndroidProjects\\FifthLessonAudioPlayer2.0\\app\\src\\main\\assets");
+                File[] listOfFiles = folder.listFiles();
+                System.out.println(listOfFiles);
+
+                for (int i = 0; i < Objects.requireNonNull(listOfFiles).length; i++) {
+                    if (listOfFiles[i].isFile()) {
+                        fileList[i] = listOfFiles[i].getName();
+                    }
+                }*/
+                f = getAssets().list("");
+                int countOfMp3 = 0;
+                String[] filesList = new String[2];
+                for (int i = 0; i < f.length; i ++) {
+                    if (f[i].contains(".mp3")) {
+                        filesList[countOfMp3] = f[i];
+                        countOfMp3 += 1;
+                    }
+                }
+                countOfMp3 = 0;
+                System.out.println(filesList);
+                AssetFileDescriptor descriptor = getAssets().openFd(filesList[musicList % filesList.length]/* "cure_for_me.mp3"*/);
                 // запись файла в mediaPlayer, задаются параметры (путь файла, смещение относительно начала файла, длина аудио в файле)
                 mediaPlayer.setDataSource(descriptor.getFileDescriptor(), descriptor.getStartOffset(), descriptor.getLength());
 
@@ -197,6 +233,7 @@ public class MainActivity extends AppCompatActivity implements Runnable {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+
         clearMediaPlayer();
     }
 
@@ -231,4 +268,27 @@ public class MainActivity extends AppCompatActivity implements Runnable {
 
         }
     }
+
+   /* private String listAssetFiles(String path) {
+
+        String [] list;
+        try {
+            list = getAssets().list(path);
+            if (list.length > 0) {
+                // This is a folder
+                for (String file : list) {
+                    if (!listAssetFiles(path + "/" + file))
+                        return null;
+                    else {
+                        // This is a file
+                        // TODO: add file name to an array list
+                    }
+                }
+            }
+        } catch (IOException e) {
+            return false;
+        }
+
+        return true;
+    }*/
 }
