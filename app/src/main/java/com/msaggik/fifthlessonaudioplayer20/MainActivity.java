@@ -121,6 +121,9 @@ public class MainActivity extends AppCompatActivity implements Runnable {
                 case R.id.floatingActionNext:
                     if (mediaPlayer != null) {
                         clearMediaPlayer();
+                        fabPlayPause.setImageDrawable(ContextCompat.getDrawable(MainActivity.this, android.R.drawable.ic_media_play));
+                        seekBar.setProgress(0);
+                        mediaPlayerStopProgress = 0;
                         musicList += 1;
                         playSong();
                         break;
@@ -178,7 +181,13 @@ public class MainActivity extends AppCompatActivity implements Runnable {
                 }*/
                 f = getAssets().list("");
                 int countOfMp3 = 0;
-                String[] filesList = new String[2];
+                for (int i = 0; i < f.length; i ++) {
+                    if (f[i].contains(".mp3")) {
+                        countOfMp3 += 1;
+                    }
+                }
+                String[] filesList = new String[countOfMp3];
+                countOfMp3 = 0;
                 for (int i = 0; i < f.length; i ++) {
                     if (f[i].contains(".mp3")) {
                         filesList[countOfMp3] = f[i];
